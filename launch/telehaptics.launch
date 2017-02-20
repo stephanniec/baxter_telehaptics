@@ -1,0 +1,11 @@
+<launch>
+
+    <!--Pose publishing node-->
+    <node name="commander" pkg="telehaptics" type="commander.py" output="screen"/>
+
+    <!--IK solve node -->
+    <!-- <node name="iksol" pkg="telehaptics" type="iksol.py" output="screen"/> -->
+
+    <!-- Velocity controller node -->
+
+</launch>

@@ -2,26 +2,24 @@
 
 '''
 Tasks:
-1. Publishes home pose
-2. Issues subsequent pose messages to 'target_position' whenever 'move_again' is TRUE
+1. Upon startup, continuously publishes home pose
+2. When 'move_again' flag is TRUE, continuously issues new pose messages to topic 'target_position'
 '''
-
 import rospy
+import baxter_interface
 from std_msgs.msg import Header, String, Bool
 from geometry_msgs.msg import(
-    PoseStamped,
     Pose,
     Point,
     Quaternion,
 )
 
 #Global variable
-move_again = None
+move_again = False
 coord = []
 
-def getFlag(flag):
-    #Callback fxn stores arm status Bool into global var move_again
-    #flag = TRUE if Baxter is waiting for next move
+def getFlag(flag): #Store arm status Bool into global var move_again
+    #flag = TRUE if Baxter is ready for next move
     global move_again
     move_again = flag
 
@@ -34,59 +32,51 @@ if __name__ == '__main__':
     #Creating subscriber for listening to arm status
     sub = rospy.Subscriber('move_done', Bool, getFlag)
 
-    #Defining home position
+    #Home pose
     home_config=Pose(
-        position=Point(
-            x= 0.464103257539,
-            y= 0.12055341652,
-            z= -0.0435690126601,
-        ),
-        orientation=Quaternion(
-            x= 1.0,
-            y= 0.0,
-            z= 0.0,
-            w= 0.0,
-        ))
-    #Publishing home_config
-    pub.publish(home_config)
-    print "Going home:"
-    print home_config
+    position=Point(
+        x=0.656982770038, y=-0.852598021641, z=0.0388609422173,
+    ),
+    orientation=Quaternion(
+        x=0.367048116303, y=0.885911751787, z=-0.108908281936,w=0.261868353356,
+    ))
 
-    #Test positions
-    test1 = [0.72099597135,0.00972967930975,-0.07, 0.997963425222, 0.0110519031264,0.0102812076764,-0.0619770451548]
-    test2 = [0.711382933155,0.169900893084,-0.06,0.996752095131,0.0399645409214,-0.0107386476991,-0.0690852934121]
+    #Test pose
+    test = [0.871394050868,0.00321779590923,-0.06,-0.115830906904,0.0266418026216,0.0784627927274,-0.0197168440116]
 
-    #Only publish new config if arm done moving to target position
-    if move_again == 1:
-        print "Ready for new target position..."
-        #New config position
-        for i in range(0,2):
-            if i == 0:
-                coord = test1
-                print "Going to test 1:"
-                print coord
-            else:
-                coord = test2
-                print "Going to test 2:"
-                print coord
+    #In future listen for new poses
 
-        new_config=Pose(
-        position=Point(
-            x=coord[0],
-            y=coord[1],
-            z=coord[2],
-        ),
-        orientation=Quaternion(
-            x=coord[3],
-            y=coord[4],
-            z=coord[5],
-            w=coord[6],
-        ))
-        pub.publish(new_config)
-        print "Confirming new_config coordinates:"
-        print new_config
-    else:
-        print "System is busy..."
+    #Go home first
+    send_config = home_config
+    print "Going home"
 
+    while not rospy.is_shutdown():
+        #Switch to publishing new_config if old_config reached
+        if move_again == True:
+            #Store old pose (just in case, not used yet)
+            old_config = send_config
+
+            #Setting up new pose for disassembly
+            coord = test
+
+            #Disassemble coord pose into Point and Quaternion vectors
+            send_config=Pose(
+                position=Point(
+                    x=coord[0],
+                    y=coord[1],
+                    z=coord[2],
+                ),
+                orientation=Quaternion(
+                    x=coord[3],
+                    y=coord[4],
+                    z=coord[5],
+                    w=coord[6],
+                )
+            )
+
+        #Continually publish a pose
+        pub.publish(send_config)
+
+    #Prevent Python from exiting unless node stopped
     rospy.spin()
 
