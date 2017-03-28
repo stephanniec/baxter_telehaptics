@@ -54,15 +54,15 @@ if __name__ == '__main__':
     #Home pose - Neutral
     home_config=Pose(
         position = Point(
-          x = 0.0,
-          y = -0.55,
-          z = -0.0,
+          x = 0.323926707341,
+          y = -0.871733353019,
+          z = 0.0185851493279,
         ),
         orientation = Quaternion(
-          x = 0.75,
-          y = 0.0,
-          z = 1.26,
-          w = 0.0,
+          x = -0.357900359421,
+          y = 0.923940517353,
+          z = 0.115186623487,
+          w = 0.0705215916534,
     ))
 
     #Go home first
@@ -81,11 +81,12 @@ if __name__ == '__main__':
 
             #Assign new pose from UI for publishing
             send_coord = UI_POSE
-            start_move_pub.publish(True)
-            MOVE_AGAIN = False
+            start_move_pub.publish(MOVE_AGAIN)  #Publishes True
+            MOVE_AGAIN = False    #Resetting flag to velocity controller
             rospy.logwarn("End of commander while loop")
 
-        target_pub.publish(send_config)
+        target_pub.publish(send_config)    #Publishes False
+        start_move_pub.publish(MOVE_AGAIN)
 
     rospy.spin()
 

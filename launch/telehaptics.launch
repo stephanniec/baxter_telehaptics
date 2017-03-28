@@ -1,5 +1,9 @@
 <launch>
 
+    <!--Baxter URDF-->
+    <arg name="baxter_urdf" value="robot_description"/>
+    <param name="$(arg baxter_urdf)" textfile="$(find telehaptics)/urdf/baxter.urdf"/>
+
     <!--Ui publishing node-->
     <node name="drawshape_ui" pkg="telehaptics" type="drawshape_ui.py" output="screen"/>
 
