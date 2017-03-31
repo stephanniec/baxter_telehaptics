@@ -8,7 +8,7 @@
 #   (Addresses inf vel at singularities)
 # 3. Publishes qdot as JointCommand msg to Baxter joint_command topic
 #
-# Last Updated: 3/27/17
+# Last Updated: 3/30/17
 #-----------------------------------------------------------------------
 # Python Imports
 import numpy as np
@@ -38,6 +38,10 @@ class VelocityController(object):
         self.damping = rospy.get_param("~damping", DAMPING)
         self.current_pose = Pose()
         self.desired_pose = Pose()
+        self.qdot_stored = JointCommand()
+        self.qdot_stored.mode = 2
+        self.qdot_stored.command = [0, 0, 0, 0, 0, 0, 0]
+        self.qdot_stored.names = ["right_s0", "right_s1", "right_e0", "right_e1", "right_w0", "right_w1", "right_w2"]
 
         # Flags
         self.running_flag = 0
@@ -46,6 +50,7 @@ class VelocityController(object):
 
         # Create KDL model
         #self.robot = URDF.from_xml_file("/home/stephanie/Projects/catkin_ws/src/baxter_common/baxter_description/urdf/baxter.urdf")
+
         with cl.suppress_stdout_stderr():    # Eliminates urdf tag warnings
             self.robot = URDF.from_parameter_server()
         self.kin = KDLKinematics(self.robot, "base", "right_hand")
@@ -69,7 +74,6 @@ class VelocityController(object):
             #rospy.logwarn("Inside start_move_cb")
             self.running_flag = 1        # Enables velocity control
         else:
-            rospy.logwarn("else start_move_cb")
             self.running_flag = 0        # Disables velocity control
 
     def current_pose_cb(self, ref):      # Stores reference pose
@@ -82,37 +86,34 @@ class VelocityController(object):
 
     def calc_ang_vel(self):
         if self.running_flag:
-            rospy.logwarn("running_flag true. calc_ang_vel")
+            rospy.logwarn("Calculating joint velocities.")
             self.running_flag = 0    # Resetting flag
 
             # Grab M0 and Slist from baxter_right_description.py
             parts = right_char()
+
             M0 = parts[0] #Zero config of right_hand
             Slist = parts[1] #6x7 screw axes mx of right arm
 
+            rospy.logwarn("before q_now")
+
             # Find joint angles and transform mx of current config
-            with cl.suppress_stdout_stderr():
-                q_now = self.kin.inverse(self.current_pose) #1x7 matrix
+            #with cl.suppress_stdout_stderr():
+            q_now = self.kin.inverse(self.current_pose) #1x7 matrix
             while (q_now is None):    # Keep trying until soln' found
                 q_now = self.kin.inverse(self.current_pose)
             T_now = r.FKinSpace(M0, Slist, q_now)
 
+            rospy.logwarn("before q_goal")
+
             # Find transform mx to DESIRED_POSE
-            rospy.logwarn("desired_pose")
-            print self.desired_pose
-
-            with cl.suppress_stdout_stderr():
-                q_goal = self.kin.inverse(self.desired_pose)
-            print q_goal
-
+            q_goal = self.kin.inverse(self.desired_pose)
             while (q_goal is None):    # Keep trying until soln' found
                 rospy.logwarn("Searching for solution...")
                 q_goal = self.kin.inverse(self.desired_pose)
-
-            rospy.logwarn("q_goal")
-            print q_goal
-
             T_goal = r.FKinSpace(M0, Slist, q_goal)
+
+            print q_goal
 
             # Construct SPACE JACOBIAN for current config
             Js = r.JacobianSpace(Slist, q_now) #6x7 matrx
@@ -127,19 +128,45 @@ class VelocityController(object):
             # Managing singularities: naive least-squares damping
             n = Js.shape[-1] #Size of last row, n = 7 joints
             invterm = np.linalg.inv(np.dot(Js.T, Js) + pow(self.damping, 2)*np.eye(n))
-            qdot = np.dot(np.dot(invterm,Js.T),Vs)
+            qdot_new = np.dot(np.dot(invterm,Js.T),Vs)
 
             #Building JointCommand msg for publishing
-            qdot_new = JointCommand()
-            qdot_new.mode = 2 # Velocity mode
-            qdot_new.command = [qdot[0], qdot[1], qdot[2], qdot[3], qdot[4], qdot[5], qdot[6]]
-            qdot_new.names = ["right_s0", "right_s1", "right_e0", "right_e1", "right_w0", "right_w1", "right_w2"]
+            qdot = JointCommand()
+            qdot.mode = 2 # Velocity mode
+            qdot.command = [qdot_new[0], qdot_new[1], qdot_new[2], qdot_new[3], qdot_new[4], qdot_new[5], qdot_new[6]]
+            qdot.names = ["right_s0", "right_s1", "right_e0", "right_e1", "right_w0", "right_w1", "right_w2"]
 
-            rospy.logwarn("Sending new pose")
-            self.qdot_pub.publish(qdot_new) # Default is 5Hz
-            self.move_done_pub.publish(True)
+            #Find maximum difference between new and old velocities
+            rospy.logwarn("Finding max difference between new and old qdot")
+            max_diff = 0
+            i = 0
+            while (i<7):
+                diff = abs(qdot.command[i] - self.qdot_stored.command[i])
+                if diff > max_diff:
+                    max_diff = diff
+                    print max_diff
+                i = i+1
+
+            print max_diff
+
+            if max_diff < 0.5:
+                qdot.command = [0, 0, 0, 0, 0, 0, 0]
+
+            #     # Position control
+            #     q = JointCommand()
+            #     q.mode = 1 # Position mode
+            #     q.command = [q_goal[0], q_goal[1], q_goal[2], q_goal[3], q_goal[4], q_goal[5], q_goal[6]]
+            #     q.names = ["right_s0", "right_s1", "right_e0", "right_e1", "right_w0", "right_w1", "right_w2"]
+            #     self.qdot_pub.publish(q)
+            #     self.move_done_pub.publish(True) # Target reached
+            # else:
+            self.qdot_pub.publish(qdot) # Publishing velocity
+            self.qdot_stored = qdot
+            self.move_done_pub.publish(False)
+
         else:
             self.move_done_pub.publish(False)
+
 
 def main():
     rospy.init_node('velocity_controller')

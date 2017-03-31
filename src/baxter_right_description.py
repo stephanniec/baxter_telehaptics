@@ -4,17 +4,24 @@
 # Script constructs M0 and Slist for baxter's right arm
 # Last updated: 3/2/17
 #-----------------------------------------------------------------------
-
+# Python Imports
+import numpy as np
 import tf.transformations as tr
+
+# ROS Imports
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
+
+# Local Imports
 import modern_robotics as r
-import numpy as np
+import custom_logging as cl
 
 def right_char():
 
     # Create KDL model
-    robot = URDF.from_xml_file("/home/stephanie/Projects/catkin_ws/src/baxter_common/baxter_description/urdf/baxter.urdf")
+    with cl.suppress_stdout_stderr():
+        #robot = URDF.from_xml_file("/home/stephanie/Projects/catkin_ws/src/baxter_common/baxter_description/urdf/baxter.urdf")
+        robot = URDF.from_parameter_server()
     kin = KDLKinematics(robot, "base", "right_hand")
 
     # Screw axis for joint 1: /right_upper_shoulder

@@ -5,7 +5,7 @@
 # 2. When 'MOVE_AGAIN' is TRUE, issues new pose to topic 'target_position'
 # 3. Updates 'MOVE_AGAIN' after new pose sent to false
 #
-# Last updated: 3/20/17
+# Last updated: 3/30/17
 #-----------------------------------------------------------------------
 
 import rospy
@@ -35,9 +35,22 @@ def ui_output_cb(pose_from_ui): #Stores new pose in trajectory
     global Ui_pose
     UI_POSE = pose_from_ui
 
+def startup():
+    print "\n*******************************************"
+    print "BAXTER-OMNI TELEHAPTICS FEEDBACK CONTROLLER"
+    print "*******************************************\n"
+
+    input = raw_input("Press 's' to start program.\n")
+    while input != 's':
+        print "Invalid input. Please try again.\n"
+        input = raw_input("Press 's' to start program.\n")
+
+    print "Starting program."
+
+    # Add user instructions here
+
 if __name__ == '__main__':
     rospy.init_node('commander')
-    rospy.logwarn("Starting up program...")
 
     #Creating subscriber for listening to UI status
     rospy.Subscriber('sent_move', Bool, sent_move_cb)
@@ -51,6 +64,9 @@ if __name__ == '__main__':
     #Creating publisher for starting velocity control
     start_move_pub = rospy.Publisher('start_move', Bool, queue_size = 3)
 
+    startup()
+
+    rospy.logwarn("Storing home pose.")
     #Home pose - Neutral
     home_config=Pose(
         position = Point(
@@ -68,16 +84,10 @@ if __name__ == '__main__':
     #Go home first
     send_config = home_config
 
-    rospy.logwarn("Going home.")
-
-    MOVE_AGAIN = True
-
     while not rospy.is_shutdown():
         #Switch to publishing new_config if old_config reached
         if MOVE_AGAIN == True:
             print "Getting new pose..."
-            #Store old pose (just in case...not used yet)
-            old_config = send_config
 
             #Assign new pose from UI for publishing
             send_coord = UI_POSE

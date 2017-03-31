@@ -4,7 +4,7 @@
 # 1. Listens to topic 'move_done'
 # 2. Continually publishes poses to make Baxter's arm draw a "square"
 #
-# Last updated 3/27/17
+# Last updated 3/30/17
 #----------------------------------------------------------------------
 
 import rospy
