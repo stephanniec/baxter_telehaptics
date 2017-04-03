@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------
 # Tasks:
 # Script constructs M0 and Slist for baxter's right arm
-# Last updated: 3/2/17
+# Last updated: 4/2/17
 #-----------------------------------------------------------------------
 # Python Imports
 import numpy as np
@@ -20,7 +20,6 @@ def right_char():
 
     # Create KDL model
     with cl.suppress_stdout_stderr():
-        #robot = URDF.from_xml_file("/home/stephanie/Projects/catkin_ws/src/baxter_common/baxter_description/urdf/baxter.urdf")
         robot = URDF.from_parameter_server()
     kin = KDLKinematics(robot, "base", "right_hand")
 
@@ -60,9 +59,9 @@ def right_char():
     v6 = -np.cross(w6,q6)
     S6 = np.append(w6,v6)
 
-    # Screw axis for joint 7: /right_hand
+    # Screw axis for joint 7: /right_wrist
     w7 = np.array([np.sqrt(2)/2, -np.sqrt(2)/2, 0])
-    q7 = np.array([0.7974618, -0.99246463, 0.320976])
+    q7 = np.array([0.71716997, -0.91217251, 0.320976])
     v7 = -np.cross(w7,q7)
     S7 = np.append(w7,v7)
 
@@ -74,14 +73,6 @@ def right_char():
     M0[0:3,3] = np.array([0.7974618, -0.99246463, 0.320976]) #ee pos @ zero
     M0[3,3] = 1
     Slist = np.array([S1,S2,S3,S4,S5,S6,S7]).T #6x7 matrix
-
-    # Testing forward kinematics: Results are very similar
-    # q = np.random.uniform(-1,1,7) #returns 1x7 list of thetas
-    # T_kin = kin.forward(q) #ee position using kdl
-    # T_r = r.FKinSpace(M0, Slist, q) #ee position using robo calc
-    # print "New line"
-    # print T_kin
-    # print T_r
 
     parts = [M0, Slist]
 

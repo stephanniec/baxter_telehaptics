@@ -70,22 +70,21 @@ if __name__ == '__main__':
     #Home pose - Neutral
     home_config=Pose(
         position = Point(
-          x = 0.323926707341,
-          y = -0.871733353019,
-          z = 0.0185851493279,
+          x = 0.562788881173,
+          y = -0.552811513529,
+          z = 0.135345612716,
         ),
         orientation = Quaternion(
-          x = -0.357900359421,
-          y = 0.923940517353,
-          z = 0.115186623487,
-          w = 0.0705215916534,
+          x = 0.972272957345,
+          y = 0.218776916338,
+          z = 0.0824998598396,
+          w = 0.00396615922789,
     ))
 
     #Go home first
     send_config = home_config
 
     while not rospy.is_shutdown():
-        #Switch to publishing new_config if old_config reached
         if MOVE_AGAIN == True:
             print "Getting new pose..."
 
