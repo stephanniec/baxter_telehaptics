@@ -29,7 +29,7 @@ def draw_circle(index):
 
     if NEW_MOVE == True:
         if index == 0:
-            rospy.logwarn("Point 1")
+            rospy.logerr("Point 1")
             coord = Pose(
               position = Point(
                 x = 0.593346296766,
@@ -43,35 +43,35 @@ def draw_circle(index):
                 w = 0.0186541822092,
             ))
 
-        elif index == 1:
-            rospy.logwarn("Point 2")
-            coord = Pose(
-              position = Point(
-                x = 0.699492549605,
-                y = -0.512625185718,
-                z = 0.155200699953,
-              ),
-              orientation = Quaternion(
-                x = 0.964986309494,
-                y = 0.241992573035,
-                z = 0.0686445919972,
-                w = 0.0743568226546,
-            ))
+        # elif index == 1:
+        #     rospy.logerr("Point 2")
+        #     coord = Pose(
+        #       position = Point(
+        #         x = 0.699492549605,
+        #         y = -0.512625185718,
+        #         z = 0.155200699953,
+        #       ),
+        #       orientation = Quaternion(
+        #         x = 0.964986309494,
+        #         y = 0.241992573035,
+        #         z = 0.0686445919972,
+        #         w = 0.0743568226546,
+        #     ))
 
-        elif index == 2:
-            rospy.logwarn("Point 3")
-            coord = Pose(
-              position = Point(
-                x = 0.526334454121,
-                y =  -0.679712790491,
-                z =  0.17463829815,
-              ),
-              orientation = Quaternion(
-                x =  0.968038006195,
-                y = 0.250115601298,
-                z =-0.00435745787217,
-                w = 0.0180448638477,
-            ))
+        # elif index == 2:
+        #     rospy.logerr("Point 3")
+        #     coord = Pose(
+        #       position = Point(
+        #         x = 0.526334454121,
+        #         y =  -0.679712790491,
+        #         z =  0.17463829815,
+        #       ),
+        #       orientation = Quaternion(
+        #         x =  0.968038006195,
+        #         y = 0.250115601298,
+        #         z =-0.00435745787217,
+        #         w = 0.0180448638477,
+        #     ))
 
         ui_pub.publish(coord)            # Sending move
         sent_move_flag.publish(True)     # Tell cmd move was sent
