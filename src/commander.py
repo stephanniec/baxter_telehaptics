@@ -45,9 +45,14 @@ def startup():
         print "Invalid input. Please try again.\n"
         input = raw_input("Press 's' to start program.\n")
 
-    print "Starting program."
-
     # Add user instructions here
+    print "\nWelcome!"
+    print "======="
+    print "Please wait for the arm to move home before proceeding...\n"
+    print "Instructions:"
+    print "1. Move the stylus of the OMNI to manipulate Baxter's right arm"
+    print "2. Hold the top button on the OMNI to close the gripper"
+    print "3. Press both buttons to stop the program\n"
 
 if __name__ == '__main__':
     rospy.init_node('commander')

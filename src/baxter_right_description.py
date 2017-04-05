@@ -66,7 +66,7 @@ def right_char():
     S7 = np.append(w7,v7)
 
     # Transform from /base to /right_hand
-    M0 = np.zeros((4,4))
+    M0 = np.zeros((4,4))    #Tsb - items in body frame wrt space frame
     M0[0:3,0:3] = np.array([[ 0, np.sqrt(2)/2, np.sqrt(2)/2],
                             [ 0, np.sqrt(2)/2, -np.sqrt(2)/2],
                             [-1, 0, 0]])

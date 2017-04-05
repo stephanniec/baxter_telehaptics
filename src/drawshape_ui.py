@@ -32,34 +32,19 @@ def draw_circle(index):
             rospy.logerr("Point 1")
             coord = Pose(
               position = Point(
-                x = 0.593346296766,
-                y =  -0.340819186946,
-                z = 0.145050291688,
+                x = 0.699492549605,
+                y = -0.512625185718,
+                z = 0.155200699953,
               ),
               orientation = Quaternion(
-                x =  0.892533088242,
-                y = 0.448704002977,
-                z = 0.0412483404739,
-                w = 0.0186541822092,
+                x = 0.964986309494,
+                y = 0.241992573035,
+                z = 0.0686445919972,
+                w = 0.0743568226546,
             ))
 
         # elif index == 1:
         #     rospy.logerr("Point 2")
-        #     coord = Pose(
-        #       position = Point(
-        #         x = 0.699492549605,
-        #         y = -0.512625185718,
-        #         z = 0.155200699953,
-        #       ),
-        #       orientation = Quaternion(
-        #         x = 0.964986309494,
-        #         y = 0.241992573035,
-        #         z = 0.0686445919972,
-        #         w = 0.0743568226546,
-        #     ))
-
-        # elif index == 2:
-        #     rospy.logerr("Point 3")
         #     coord = Pose(
         #       position = Point(
         #         x = 0.526334454121,

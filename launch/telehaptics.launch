@@ -10,11 +10,7 @@
     <!--Pose publishing node-->
     <node name="commander" pkg="telehaptics" type="commander.py" output="screen"/>
 
-    <!--Velocity controller node -->
-    <!--<node name="velcon" pkg="telehaptics" type="velcon.py" output="screen"/>-->
-
-    <!--Velocity controller no.2 node -->
+    <!--Velocity controller no. node -->
     <node name="velocity_controller" pkg="telehaptics" type="velocity_controller.py" output="screen"/>
-
 
 </launch>

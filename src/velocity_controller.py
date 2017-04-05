@@ -3,16 +3,16 @@
 # Class version of velcon.py
 #
 # Task:
-# 1. Finds Js and Vs
+# 1. Finds Jb and Vb
 # 2. Uses naive least-squares damping to find qdot
 #   (Addresses inf vel at singularities)
 # 3. Publishes qdot as JointCommand msg to Baxter joint_command topic
 #
-# Last Updated: 4/3/17
+# Last Updated: 4/4/17
 #-----------------------------------------------------------------------
 # Python Imports
 import numpy as np
-from math import pow, pi
+from math import pow, pi, sqrt
 import tf.transformations as tr
 import threading
 
@@ -59,8 +59,8 @@ class VelocityController(object):
         self.qdot_stored.command = np.zeros(7)
         self.qdot_stored.names = self.names
 
-        self.drive_right = -1
-        self.drive_left = 1
+        self.drive_right = -0.5
+        self.drive_left = 0.5
 
         # Flags
         self.running_flag = 0
@@ -83,7 +83,7 @@ class VelocityController(object):
         else:
             self.running_flag = 0        # Disables velocity control
 
-    def current_js_cb(self, js):         # Grabs current joint angles
+    def current_js_cb(self, js):         # Returns current joint angles
         qtemp = np.zeros(7)
         names = self.names
         i = 0
@@ -92,81 +92,95 @@ class VelocityController(object):
                 qtemp[i] = js.position[j]
                 i += 1
         with self.mutex:
-            self.q = qtemp
-        return
+            self.q = qtemp              # Angles in radians
 
     def ref_se3_cb(self, some_pose):   # Takes target pose, returns desired se3
         with self.mutex:
             p = np.array([some_pose.position.x, some_pose.position.y, some_pose.position.z])
             quat = np.array([some_pose.orientation.x, some_pose.orientation.y, some_pose.orientation.z, some_pose.orientation.w])
             self.T_goal = tr.compose_matrix(angles=tr.euler_from_quaternion(quat, 'sxyz'), translate=p)
-        return
 
     def check_joint_limits(self):      #Check if joint limit reached
         rospy.logwarn("Checking joint limits...")
         if self.q[0] <= -1.5:
             print "Lower joint 1 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[0] = self.drive_right
         elif self.q[0] >= 1.5:
             print "Upper joint 1 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[0] = self.drive_left
 
         if self.q[1] <= -2.0:
             print "Lower joint 2 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[1] = self.drive_right
         elif self.q[1] >= 1.0:
             print "Upper joint 2 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[1] = self.drive_left
 
         if self.q[2] <= -3.0:
             print "Lower joint 3 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[2] = self.drive_right
         elif self.q[2] >= 3.0:
             print "Upper joint 3 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[2] = self.drive_left
 
         if self.q[3] <= -0.05:
             print "Lower joint 4 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[3] = self.drive_right
         elif self.q[3] >= 2.5:
             print "Upper joint 4 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[3] = self.drive_left
 
         if self.q[4] <= -3.0:
             print "Lower joint 5 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[4] = self.drive_right
         elif self.q[4] >= 3.0:
             print "Upper joint 5 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[4] = self.drive_left
 
         if self.q[5] <= -1.5:
             print "Lower joint 6 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[5] = self.drive_right
         elif self.q[5] >= 2.0:
             print "Upper joint 6 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[5] = self.drive_left
 
         if self.q[6] <= -3.0:
             print "Lower joint 7 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[6] = self.drive_right
         elif self.q[6] >= 3.0:
             print "Upper joint 7 limit reached"
+            self.qdot.command = np.zeros(7)
             self.qdot.command[6] = self.drive_left
 
-    def stop_oscillations(self):     #Check if arm oscillating
-            rospy.logwarn("Max difference between new and old qdot")
-            max_dv = 0
-            i = 0
-            while (i<7):
-                dv = abs(self.qdot.command[i] - self.qdot_stored.command[i])
-                if dv > max_dv:
-                    max_dv = dv
-                i = i+1
-            print max_dv
+    def stop_oscillations(self, error):     #Check if arm oscillating
+        rospy.logwarn("Calculating position norm of error")
+        err_point = error[0:3, -1]
+        i = 0
+        err_norm = 0
+        while i<len(err_point):
+            err_norm += pow(err_point[i],2)
+            i += 1
+        err_norm = sqrt(err_norm)
 
-            if max_dv < 0.5:
-                self.qdot.command = [0, 0, 0, 0, 0, 0, 0]
-                self.move_done_pub.publish(True)
+        print err_norm
+
+        if err_norm < 0.05:
+            self.qdot.command = [0, 0, 0, 0, 0, 0, 0]
+            self.move_done_pub.publish(True)
+        return
 
     def calc_ang_vel(self):
         if self.running_flag:
@@ -179,30 +193,35 @@ class VelocityController(object):
             M0 = parts[0] #Zero config of right_hand
             Slist = parts[1] #6x7 screw axes mx of right arm
 
+            #Convert Slist to Blist
+            Tbs = r.TransInv(M0)
+            Blist = np.zeros(Slist.shape) #6x7 mx of 0's
+            for item, screw in enumerate(Slist.T): #index = 7, screw = 6x1
+                Blist[:, item] = np.dot(r.Adjoint(Tbs), screw.T)
+
             #Current joint angles
             q_now = self.q #1x7 mx
             print "q_now", q_now
 
             # Desired config: base to desired - Tbd
             with self.mutex:
-                T_bd = self.T_goal
+                T_sd = self.T_goal
 
             # Find transform from current pose to desired pose, error
-            e = np.dot(r.TransInv(r.FKinSpace(M0, Slist, q_now)), T_bd)  #e = Tad = TabTbd
+            #e = Tbd = TbsTsd
+            e = np.dot(r.TransInv(r.FKinBody(M0, Blist, q_now)), T_sd)
             print "error", e
 
             # Desired TWIST: MatrixLog6 SE(3) -> se(3) exp coord
-            Vs = r.se3ToVec(r.MatrixLog6(e))
-
-            # Construct SPACE JACOBIAN for current config
-            Js = r.JacobianSpace(Slist, q_now) #6x7 mx
+            Vb = r.se3ToVec(r.MatrixLog6(e))
+            # Construct BODY JACOBIAN for current config
+            Jb = r.JacobianBody(Blist, q_now) #6x7 mx
 
             # Desired ang vel - Eq 5 from Chiaverini & Siciliano, 1994
             # Managing singularities: naive least-squares damping
-            n = Js.shape[-1] #Size of last row, n = 7 joints
-            invterm = np.linalg.inv(np.dot(Js.T, Js) + pow(self.damping, 2)*np.eye(n))
-            qdot_new = np.dot(np.dot(invterm,Js.T),Vs)
-            print "raw qdot calculated", qdot_new
+            n = Jb.shape[-1] #Size of last row, n = 7 joints
+            invterm = np.linalg.inv(np.dot(Jb.T, Jb) + pow(self.damping, 2)*np.eye(n))
+            qdot_new = np.dot(np.dot(invterm,Jb.T),Vb)
 
             # Scaling joint velocity
             minus_v = abs(np.amin(qdot_new))
@@ -212,16 +231,16 @@ class VelocityController(object):
             else:
                 scale = plus_v
             if scale > self.joint_vel_limit:
-                qdot_new = (qdot_new/scale)*self.joint_vel_limit
+                qdot_new = 0.1*(qdot_new/scale)*self.joint_vel_limit
 
             self.qdot.command = qdot_new #1x7
             print "scaled qdot", self.qdot.command
 
             #Safety checks - will modify self.qdot.command if needed
-            self.check_joint_limits()
-            self.stop_oscillations()
+            #self.check_joint_limits()
+            self.stop_oscillations(e)
 
-            #self.joint_cmd_pub.publish(self.qdot) # Publishing velocity
+            self.joint_cmd_pub.publish(self.qdot) # Publishing velocity
             self.qdot_stored.command = self.qdot.command
             print "qdot_stored.command", self.qdot_stored.command
 
