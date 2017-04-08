@@ -74,7 +74,7 @@ class VelocityController(object):
         self.joint_cmd_pub = rospy.Publisher('robot/limb/right/joint_command', JointCommand, queue_size = 3)
         self.move_done_pub = rospy.Publisher('move_done', Bool, queue_size = 3)
 
-        while True:
+        while not rospy.is_shutdown:
             self.calc_ang_vel()
 
     def start_move_cb(self, from_cmd):   # Toggling run flag
@@ -95,10 +95,11 @@ class VelocityController(object):
             self.q = qtemp              # Angles in radians
 
     def ref_se3_cb(self, some_pose):   # Takes target pose, returns desired se3
+        p = np.array([some_pose.position.x, some_pose.position.y, some_pose.position.z])
+        quat = np.array([some_pose.orientation.x, some_pose.orientation.y, some_pose.orientation.z, some_pose.orientation.w])
+        goal_tmp = tr.compose_matrix(angles=tr.euler_from_quaternion(quat, 'sxyz'), translate=p)
         with self.mutex:
-            p = np.array([some_pose.position.x, some_pose.position.y, some_pose.position.z])
-            quat = np.array([some_pose.orientation.x, some_pose.orientation.y, some_pose.orientation.z, some_pose.orientation.w])
-            self.T_goal = tr.compose_matrix(angles=tr.euler_from_quaternion(quat, 'sxyz'), translate=p)
+            self.T_goal = goal_tmp
 
     def check_joint_limits(self):      #Check if joint limit reached
         rospy.logwarn("Checking joint limits...")
@@ -186,7 +187,7 @@ class VelocityController(object):
         if self.running_flag:
             print "========================================="
             rospy.logwarn("Calculating joint velocities.")
-            self.running_flag = 0    # Resetting flag
+            #self.running_flag = 0    # Resetting flag
 
             # Grab M0 and Slist from baxter_right_description.py
             parts = right_char()
@@ -200,7 +201,8 @@ class VelocityController(object):
                 Blist[:, item] = np.dot(r.Adjoint(Tbs), screw.T)
 
             #Current joint angles
-            q_now = self.q #1x7 mx
+            with self.mutex:
+                q_now = self.q #1x7 mx
             print "q_now", q_now
 
             # Desired config: base to desired - Tbd

@@ -1,0 +1,13 @@
+<launch>
+
+    <!--Baxter URDF-->
+    <arg name="baxter_urdf" value="robot_description"/>
+    <param name="$(arg baxter_urdf)" textfile="$(find telehaptics)/urdf/baxter.urdf"/>
+
+    <!--Target pose publishing node-->
+    <node name="basic_ui" pkg="telehaptics" type="basic_ui.py" output="screen"/>
+
+    <!--Bare velocity controller node -->
+    <node name="velocity_control" pkg="telehaptics" type="velocity_control.py" output="screen"/>
+
+</launch>
