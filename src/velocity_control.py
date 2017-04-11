@@ -31,12 +31,12 @@ import modern_robotics as r
 import custom_logging as cl
 
 TIME_LIMIT = 15    #15s
-DAMPING = 0.005
+DAMPING = 0.1
 JOINT_VEL_LIMIT = 2    #2rad/s
 
 class VelocityControl(object):
     def __init__(self):
-        rospy.logwarn("Creating VelocityController class")
+        rospy.loginfo("Creating VelocityController class")
 
         # Create KDL model
         with cl.suppress_stdout_stderr():    # Eliminates urdf tag warnings
@@ -47,6 +47,11 @@ class VelocityControl(object):
         # Limb interface
         self.arm = baxter_interface.Limb("right")
 
+        # Grab M0 and Slist from baxter_right_description.py
+        parts = right_char()
+        self.M0 = parts[0] #Zero config of right_hand
+        self.Slist = parts[1] #6x7 screw axes mx of right arm
+        
         # Shared variables
         self.mutex = threading.Lock()
         self.time_limit = rospy.get_param("~time_limit", TIME_LIMIT)
@@ -60,27 +65,15 @@ class VelocityControl(object):
         self.ref_pose_sub = rospy.Subscriber('ref_pose', Pose, self.ref_pose_cb)
 
         # Timeout & Rate
-        self.arm.set_command_timeout(self.time_limit)
+        # self.arm.set_command_timeout(self.time_limit)
+
         self.r = rospy.Rate(100)
         while not rospy.is_shutdown():
             self.calc_joint_vel()
             self.r.sleep()
 
-    #     # Test
-    #     self.current_js_cb_sub = rospy.Subscriber('/robot/joint_states', JointState, self.current_js_cb)
-
-    # def current_js_cb(self, js):         # Returns current joint angles
-    #     qtemp = np.zeros(7)
-    #     names = self.names
-    #     i = 0
-    #     for j,n in enumerate(js.name):
-    #         if n in names:
-    #             qtemp[i] = js.position[j]
-    #             i += 1
-    #     with self.mutex:
-    #         self.q = qtemp              # Angles in radians
-
     def ref_pose_cb(self, some_pose): # Takes target pose, returns ref se3
+        rospy.logdebug("ref_pose_cb called in velocity_control.py")
         p = np.array([some_pose.position.x, some_pose.position.y, some_pose.position.z])
         quat = np.array([some_pose.orientation.x, some_pose.orientation.y, some_pose.orientation.z, some_pose.orientation.w])
         goal_tmp = tr.compose_matrix(angles=tr.euler_from_quaternion(quat, 'sxyz'), translate=p)
@@ -106,32 +99,27 @@ class VelocityControl(object):
             i += 1
         v_norm = sqrt(v_norm)
 
-        print "v_norm", v_norm
+        # print "v_norm", v_norm
 
-        if v_norm < 0.005:
+        if v_norm < 0.1:
             self.qdot = np.zeros(7)
         return
 
     def calc_joint_vel(self):
-        print "========================================="
-        rospy.logwarn("Calculating joint velocities...")
+        # print "========================================="
+        rospy.logdebug("Calculating joint velocities...")
 
-        # Grab M0 and Slist from baxter_right_description.py
-        parts = right_char()
-        M0 = parts[0] #Zero config of right_hand
-        Slist = parts[1] #6x7 screw axes mx of right arm
-
-        #Convert Slist to Blist
-        Tbs = r.TransInv(M0)
-        Blist = np.zeros(Slist.shape) #6x7 mx of 0's
-        for item, screw in enumerate(Slist.T): #index = 7, screw = 6x1
+        # Convert Slist to Blist
+        Tbs = r.TransInv(self.M0)
+        Blist = np.zeros(self.Slist.shape) #6x7 mx of 0's
+        for item, screw in enumerate(self.Slist.T): #index = 7, screw = 6x1
             Blist[:, item] = np.dot(r.Adjoint(Tbs), screw.T)
 
-        #Current joint angles
+        # Current joint angles
         self.get_q_now()
         with self.mutex:
             q_now = self.q #1x7 mx
-        print "q_now", q_now
+        # print "q_now", q_now
 
         # Desired config: base to desired - Tbd
         with self.mutex:
@@ -139,8 +127,8 @@ class VelocityControl(object):
 
         # Find transform from current pose to desired pose, error
         #e = Tbd = TbsTsd
-        e = np.dot(r.TransInv(r.FKinBody(M0, Blist, q_now)), T_sd)
-        print "error", e
+        e = np.dot(r.TransInv(r.FKinBody(self.M0, Blist, q_now)), T_sd)
+        # print "error", e
 
         # Desired TWIST: MatrixLog6 SE(3) -> se(3) exp coord
         Vb = r.se3ToVec(r.MatrixLog6(e))
@@ -161,12 +149,13 @@ class VelocityControl(object):
         else:
             scale = plus_v
         if scale > self.joint_vel_limit:
-            qdot_new = 0.1*(qdot_new/scale)*self.joint_vel_limit
+            qdot_new = 1.0*(qdot_new/scale)*self.joint_vel_limit
         self.qdot = qdot_new #1x7
-        print "scaled qdot", self.qdot
 
         # Zero velocity if very close to target
-        self.stop_oscillating()
+        # self.stop_oscillating()
+
+        # print self.qdot
 
         # Constructing dictionary
         qdot_output = dict(zip(self.names, self.qdot))
@@ -180,7 +169,8 @@ def main():
 
     try:
         vc = VelocityControl()
-    except rospy.ROSInterruptException: pass
+    except rospy.ROSInterruptException:
+        pass
 
     rospy.spin()
 
