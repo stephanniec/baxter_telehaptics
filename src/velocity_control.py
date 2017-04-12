@@ -9,7 +9,7 @@
 #   (Addresses inf vel at singularities)
 # 3. Publishes qdot to Baxter using the limb interface
 #
-# Last Updated: 4/6/17
+# Last Updated: 4/11/17
 #-----------------------------------------------------------------------
 # Python Imports
 import numpy as np
@@ -30,6 +30,9 @@ from baxter_right_description import right_char
 import modern_robotics as r
 import custom_logging as cl
 
+####################
+# GLOBAL VARIABLES #
+####################
 TIME_LIMIT = 15    #15s
 DAMPING = 0.1
 JOINT_VEL_LIMIT = 2    #2rad/s
@@ -46,12 +49,13 @@ class VelocityControl(object):
 
         # Limb interface
         self.arm = baxter_interface.Limb("right")
+        self.hand = baxter_interface.Gripper('right')
 
         # Grab M0 and Slist from baxter_right_description.py
         parts = right_char()
         self.M0 = parts[0] #Zero config of right_hand
         self.Slist = parts[1] #6x7 screw axes mx of right arm
-        
+
         # Shared variables
         self.mutex = threading.Lock()
         self.time_limit = rospy.get_param("~time_limit", TIME_LIMIT)
@@ -64,8 +68,7 @@ class VelocityControl(object):
         # Subscriber
         self.ref_pose_sub = rospy.Subscriber('ref_pose', Pose, self.ref_pose_cb)
 
-        # Timeout & Rate
-        # self.arm.set_command_timeout(self.time_limit)
+        self.hand.calibrate()
 
         self.r = rospy.Rate(100)
         while not rospy.is_shutdown():
@@ -99,14 +102,11 @@ class VelocityControl(object):
             i += 1
         v_norm = sqrt(v_norm)
 
-        # print "v_norm", v_norm
-
         if v_norm < 0.1:
             self.qdot = np.zeros(7)
         return
 
     def calc_joint_vel(self):
-        # print "========================================="
         rospy.logdebug("Calculating joint velocities...")
 
         # Convert Slist to Blist
@@ -119,16 +119,13 @@ class VelocityControl(object):
         self.get_q_now()
         with self.mutex:
             q_now = self.q #1x7 mx
-        # print "q_now", q_now
 
         # Desired config: base to desired - Tbd
         with self.mutex:
             T_sd = self.T_goal
 
         # Find transform from current pose to desired pose, error
-        #e = Tbd = TbsTsd
         e = np.dot(r.TransInv(r.FKinBody(self.M0, Blist, q_now)), T_sd)
-        # print "error", e
 
         # Desired TWIST: MatrixLog6 SE(3) -> se(3) exp coord
         Vb = r.se3ToVec(r.MatrixLog6(e))
@@ -151,11 +148,6 @@ class VelocityControl(object):
         if scale > self.joint_vel_limit:
             qdot_new = 1.0*(qdot_new/scale)*self.joint_vel_limit
         self.qdot = qdot_new #1x7
-
-        # Zero velocity if very close to target
-        # self.stop_oscillating()
-
-        # print self.qdot
 
         # Constructing dictionary
         qdot_output = dict(zip(self.names, self.qdot))

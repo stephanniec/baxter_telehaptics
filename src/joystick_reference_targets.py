@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------
 # Tasks:
 # 1. Takes PS3 joy node output and
-# 2. Maps controller commands to a pose
+# 2. Maps controller positions to a pose
 # 3. Defines EE pose work space
 #
 # Last updated 4/11/17
@@ -27,7 +27,7 @@ ZERO_ORI = calc_quat(0.0)
 XYZ_MIN = np.array([0.6, -0.75, -0.25])
 XYZ_MAX = np.array([0.8, -0.25, 0.25])
 XYZ_SCALE = np.array([0.1, 0.25, 0.25])
-XYZ_INVERT_MAP = np.array([1, -1, 1])
+XYZ_INVERT_MAP = np.array([-1, -1, 1])
 XYZ_INDEX_ARR = np.array([3,0,1])
 TH_SCALE = 0.75
 TH_INDEX = 2
@@ -48,7 +48,7 @@ class SimpleTargets(object):
         self.ee_dot = np.array([0,0,0])
         self.th = 0.0
         self.th_dot = 0.0
-        
+
         #Subscribers and Publishers
         self.br = tf.TransformBroadcaster()
         self.joy_sub = rospy.Subscriber('joy', Joy, self.joy_cb)
@@ -68,7 +68,6 @@ class SimpleTargets(object):
             self.th_dot = 0.0
         return
 
-
     def timer_cb(self, event):
         # integrate our goal pose:
         new_pos = self.position + self.ee_dot*(1/float(FREQUENCY))
@@ -80,11 +79,12 @@ class SimpleTargets(object):
         # update orientation
         self.th = np.clip(self.th + self.th_dot*(1/float(FREQUENCY)), TH_MIN, TH_MAX)
         self.orientation = calc_quat(self.th)
-        
+
         # publish Pose and send tf
         self.ref_pose_pub.publish(Pose(Point(*self.position), Quaternion(*self.orientation)))
         self.br.sendTransform(self.position, self.orientation, rospy.Time.now(), TARGET_FRAME, REF_FRAME)
         return
+
 
 def main():
     rospy.init_node('joystick_reference_pose_generator')
