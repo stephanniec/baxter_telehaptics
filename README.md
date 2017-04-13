@@ -22,7 +22,7 @@ This node closes Baxter's right gripper when the R1 trigger on a PS3 console is 
 > joysys.launch
 
 ## PS3 Controls
-![ps3console](https://github.com/stephanniec/baxter_telehaptics/blob/master/imgs/ps3_schematic.png)
+<center>![ps3console](https://github.com/stephanniec/baxter_telehaptics/blob/master/imgs/ps3_schematic.png)</center><br>
 <b>L1 button</b> || Hold down to enable robot movement<br>
 <b>R1 button</b> || Hold down to close robot end-effector
 
