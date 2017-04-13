@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #----------------------------------------------------------------------
 # Tasks:
-# 1. Takes PS3 joy node output and
+# 1. Reads PS3 joy node output
 # 2. Maps controller positions to a pose
 # 3. Defines EE pose work space
 #
