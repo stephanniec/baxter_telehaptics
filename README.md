@@ -1,7 +1,7 @@
 # Geomagic Touch Mediated Haptic Interface
 
 ## Purpose
-The Telehaptics Ros Python package allows users to drive the right arm of a Baxter research robot using the stylus of a Geomagic Touch. When the end effector of the arm experiences external force, the Geomagic Touch replicates the same forces on the user's hand - creating a closed-loop biofeedback interface.
+The Telehaptics Ros Python package allows users to drive the right arm of a Baxter or Sawyer research robot using the stylus of a Geomagic Touch. If external force is applied to the end effector, the Geomagic Touch will remotely generate the same forces on the user's hand - creating a closed-loop biofeedback interface.
 
 ## Node Network
 <b>joystick_reference_targets.py</b><br>
@@ -10,8 +10,12 @@ This node generates target poses using the position values published by joy_node
 <b>velocity_control.py</b><br>
 This node finds and uses the body Jacobian and twists of Baxter's right arm to compute the angular velocities needed to move Baxter's right arm from its current pose to a target pose. It employs the naive damped least-squares method to eliminate jerky movements near singularities.
 
+(Sawyer equivalent: sawyer_velocity_control.py)
+
 <b>gripper_control.py</b><br>
 This node closes Baxter's right gripper when the R1 trigger on a PS3 console is held down.
+
+(Sawyer equivalent: sawyer_gripper_control.py)
 
 ## Launch Files
 
@@ -20,6 +24,8 @@ This node closes Baxter's right gripper when the R1 trigger on a PS3 console is 
 > basicsys.launch
 
 > joysys.launch
+
+> sawyer_joysys.launch
 
 ## PS3 Controls
 ![ps3console](https://github.com/stephanniec/baxter_telehaptics/blob/master/imgs/ps3_schematic.png)<br>
