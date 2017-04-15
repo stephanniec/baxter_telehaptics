@@ -16,16 +16,16 @@ import tf.transformations as tr
 import numpy as np
 
 def calc_quat(th):
-    return tr.quaternion_from_euler(0, np.pi, th, 'rxyz')
+    return tr.quaternion_from_euler(3.115649698300095, -0.02399721058403635, th, 'rxyz')
 
 ####################
 # GLOBAL VARIABLES #
 ####################
-ZERO_POS = np.array([0.7, -0.45, 0.0])
+ZERO_POS = np.array([0.902160877388, -0.0715308389238, 0.284243124085])
 # ZERO_ORI = np.array([0.997, -0.076, -0.005, -0.002])
 ZERO_ORI = calc_quat(0.0)
-XYZ_MIN = np.array([0.6, -0.75, -0.25])
-XYZ_MAX = np.array([0.8, -0.25, 0.25])
+XYZ_MIN = np.array([0.4, -0.4, 0.01])
+XYZ_MAX = np.array([0.82, 0.4, 0.25])
 XYZ_SCALE = np.array([0.1, 0.25, 0.25])
 XYZ_INVERT_MAP = np.array([-1, -1, 1])
 XYZ_INDEX_ARR = np.array([3,0,1])

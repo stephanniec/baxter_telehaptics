@@ -7,7 +7,7 @@
     <node name="joy_node" pkg="joy" type="joy_node" output="screen"/>
 
     <!--Rviz-->
-    <!-- <node name="rviz" pkg="rviz" type="rviz" output="screen"/> -->
+<!--     <node name="rviz" pkg="rviz" type="rviz" output="screen"/> -->
 
     <!--PS3 pose publishing node-->
     <node name="joystick_reference_pose_generator" pkg="telehaptics" type="joystick_reference_targets.py" output="screen"/>
@@ -16,6 +16,6 @@
     <node name="velocity_control" pkg="telehaptics" type="sawyer_velocity_control.py" output="screen"/>
 
      <!--Gripper control node-->
-    <node name="gripper_open_close" pkg="telehaptics" type="sawyer_gripper_control.py" />
+    <node name="gripper_open_close" pkg="telehaptics" type="sawyer_gripper_control.py" output="screen"/>
 
 </launch>

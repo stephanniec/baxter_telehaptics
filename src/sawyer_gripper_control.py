@@ -15,21 +15,34 @@ import intera_interface
 ####################
 DEADMAN_INDEX = 10
 GRIPPER_INDEX = 11
+OPEN = True
+CLOSED = False
 
 class HandControl():
     def __init__(self):
         rospy.loginfo("Creating HandControl class")
 
         self.rh = intera_interface.gripper.Gripper("right")
+        rospy.sleep(1.0)
+        self.gripper_state = OPEN
+        self.gripper_state = CLOSED
 
         # Subscriber
         self.right_trigger_sub = rospy.Subscriber('joy', Joy, self.right_trigger_cb, queue_size=1)
 
     def right_trigger_cb(self,joy_msg):
         if (joy_msg.buttons[GRIPPER_INDEX] and joy_msg.buttons[DEADMAN_INDEX]):
-            self.rh.close()
+            desired_state = CLOSED
+            command = self.rh.close
         else:
-            self.rh.open()
+            desired_state = OPEN
+            command = self.rh.open
+        # print "desired = ",desired_state
+        # print "internal = ",self.gripper_state
+        if self.gripper_state is not desired_state:
+            rospy.loginfo("Changing gripper state to %s", desired_state)
+            command()
+            self.gripper_state = desired_state
         return
 
 def main():
