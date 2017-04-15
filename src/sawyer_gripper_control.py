@@ -4,7 +4,7 @@
 # 1. Checks if right trigger on PS3 pressed
 # 2. Open/Closes right gripper
 #
-# Last updated 4/13/17
+# Last updated 4/14/17
 #----------------------------------------------------------------------
 import rospy
 from sensor_msgs.msg import Joy
