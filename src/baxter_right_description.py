@@ -2,6 +2,8 @@
 #----------------------------------------------------------------------
 # Tasks:
 # Script constructs M0 and Slist for baxter's right arm
+#
+# Written By Stephanie L. Chang
 # Last updated: 4/2/17
 #-----------------------------------------------------------------------
 # Python Imports

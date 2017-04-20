@@ -9,6 +9,7 @@
 #   (Addresses inf vel at singularities)
 # 3. Publishes qdot to Baxter using the limb interface
 #
+# Written By Stephanie L. Chang
 # Last Updated: 4/11/17
 #-----------------------------------------------------------------------
 # Python Imports

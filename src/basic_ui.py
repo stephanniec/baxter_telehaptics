@@ -3,6 +3,7 @@
 # Tasks:
 # 1. Continually publishes poses to make Baxter's arm follow omni
 #
+# Written By Stephanie L. Chang
 # Last updated 4/6/17
 #----------------------------------------------------------------------
 import rospy

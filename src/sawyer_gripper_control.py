@@ -4,6 +4,7 @@
 # 1. Checks if right trigger on PS3 pressed
 # 2. Open/Closes right gripper
 #
+# Written by Stephanie L. Chang
 # Last updated 4/14/17
 #----------------------------------------------------------------------
 import rospy

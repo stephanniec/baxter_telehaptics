@@ -9,6 +9,7 @@
 #   (Addresses inf vel at singularities)
 # 3. Publishes qdot to Sawyer using the limb interface
 #
+# Written By Stephanie L. Chang
 # Last Updated: 4/13/17
 #-----------------------------------------------------------------------
 # Python Imports
@@ -34,7 +35,7 @@ import custom_logging as cl
 # GLOBAL VARIABLES #
 ####################
 TIME_LIMIT = 15    #15s
-DAMPING = 0.1
+DAMPING = 0.03
 JOINT_VEL_LIMIT = 2    #2rad/s
 
 class VelocityControl(object):

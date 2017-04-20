@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #----------------------------------------------------------------------
+#
 # Tasks:
 # 1. Reads PS3 joy node output
 # 2. Maps controller positions to a pose
 # 3. Defines EE pose work space
 #
+# Written by Stephanie L. Chang
 # Last updated 4/11/17
 #----------------------------------------------------------------------
 import rospy
@@ -28,8 +30,8 @@ XYZ_MIN = np.array([0.4, -0.4, 0.01])
 XYZ_MAX = np.array([0.82, 0.4, 0.25])
 XYZ_SCALE = np.array([0.1, 0.25, 0.25])
 XYZ_INVERT_MAP = np.array([-1, -1, 1])
-XYZ_INDEX_ARR = np.array([3,0,1])
-TH_SCALE = 0.75
+XYZ_INDEX_ARR = np.array([1,0,3])
+TH_SCALE = 2.5
 TH_INDEX = 2
 TH_MIN = -np.pi/2
 TH_MAX = np.pi/2

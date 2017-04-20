@@ -1,7 +1,14 @@
+#-----------------------------------------------------------------------
+# Tasks:
+# 1. Returns M0 matrix and body twists for Sawyer
+#
+# Obtained from Chainatee Tanakulrungson
+#-----------------------------------------------------------------------
+
 import numpy as np
 from math import cos, sin, radians
 
-s10 = sin(radians(10)) 
+s10 = sin(radians(10))
 c10 = cos(radians(10))
 
 Blist = np.array([[s10, -c10, 0., -1.0155*c10, -1.0155*s10, -0.1603],

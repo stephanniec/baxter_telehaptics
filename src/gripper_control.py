@@ -2,8 +2,9 @@
 #----------------------------------------------------------------------
 # Tasks:
 # 1. Checks if right trigger on PS3 pressed
-# 2. Open/Closes right gripper
+# 2. Open/Closes Baxter's right gripper
 #
+# Written BY Stephanie L. Chang
 # Last updated 4/11/17
 #----------------------------------------------------------------------
 import rospy
