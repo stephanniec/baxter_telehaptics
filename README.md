@@ -5,27 +5,27 @@ The Telehaptics Ros Python package allows users to drive the right arm of a Baxt
 
 ## Node Network
 <b>joystick_reference_targets.py</b><br>
-This node generates target poses using the position values published by joy_node. As a safety precaution, it also ensures that Baxter will not move unless the L1 trigger on a PS3 console is held down.
+This node generates target poses using the position values published by `joy_node`. As a safety precaution, it also ensures that Baxter will not move unless the L1 trigger on a PS3 console is held down.
 
 <b>velocity_control.py</b><br>
 This node finds and uses the body Jacobian and twists of Baxter's right arm to compute the angular velocities needed to move Baxter's right arm from its current pose to a target pose. It employs the naive damped least-squares method to eliminate jerky movements near singularities.
 
-(Sawyer equivalent: sawyer_velocity_control.py)
+(Sawyer equivalent: `sawyer_velocity_control.py`)
 
 <b>gripper_control.py</b><br>
 This node closes Baxter's right gripper when the R1 trigger on a PS3 console is held down.
 
-(Sawyer equivalent: sawyer_gripper_control.py)
+(Sawyer equivalent: `sawyer_gripper_control.py`)
 
 ## Launch Files
 
-> simstate.launch
+`simstate.launch`
 
-> basicsys.launch
+`basicsys.launch`
 
-> joysys.launch
+`joysys.launch`
 
-> sawyer_joysys.launch
+`sawyer_joysys.launch`
 
 ## PS3 Controls
 ![ps3console](https://github.com/stephanniec/baxter_telehaptics/blob/master/imgs/ps3_schematic.png)<br>
@@ -36,6 +36,15 @@ This node closes Baxter's right gripper when the R1 trigger on a PS3 console is 
 <b>Left stick (U/D)</b> || Vertical movement along the Z-axis<br>
 <b>Right stick (U/D)</b> || Horizontal movement towards or away from user along the X-axis<br>
 <b>Right stick (L/R)</b> || Rotates the gripper clockwise or counterclockwise
+
+## Set-up Instructions
+After cloning `baxter_telehaptics` into a catkin workspace, please install the following auxilary packages:
+
+* `joy`
+* `hrl-kdl`
+* `sawyer_robot`
+* `baxter_interface`
+
 
 ## Current Status
 * PS3 Controller UI - done
