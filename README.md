@@ -38,13 +38,12 @@ This node closes Baxter's right gripper when the R1 trigger on a PS3 console is 
 <b>Right stick (L/R)</b> || Rotates the gripper clockwise or counterclockwise
 
 ## Set-up Instructions
-After cloning `baxter_telehaptics` into a catkin workspace, please install the following auxilary packages:
+After cloning `baxter_telehaptics` into a catkin workspace, please install the following auxiliary packages:
 
 * `joy`
 * `hrl-kdl`
 * `sawyer_robot`
 * `baxter_interface`
-
 
 ## Current Status
 * PS3 Controller UI - done
