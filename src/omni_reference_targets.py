@@ -19,7 +19,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 import numpy as np
 
 #Local Imports
-from phantom_omni.msg import PhantomButtonEvent
+import kbhit
 
 def calc_quat(th):
     return tr.quaternion_from_euler(3.115649698300095, -0.02399721058403635, th, 'rxyz')
@@ -43,6 +43,8 @@ FREQUENCY = 20
 REF_FRAME = "base"
 TARGET_FRAME = "target"
 STYLUS_FRAME = "stylus"
+ON = True
+OFF = False
 
 class SimpleTargets(object):
     def __init__(self):
@@ -54,12 +56,16 @@ class SimpleTargets(object):
         self.ee_dot = np.array([0,0,0])
         self.th = 0.0
         self.th_dot = 0.0
-        self.run_flag = False
+        self.run_flag = ON
+        self.run_flag = OFF
+
+        # Instantiating keyboard object
+        self.key = kbhit.KBHit()
 
         #Subscribers and Publishers
         self.br = tf.TransformBroadcaster()
         self.listen = tf.TransformListener()
-        self.omni_button_sub = rospy.Subscriber("omni1_button", PhantomButtonEvent, self.button_cb)
+        self.key_timer = rospy.Timer(rospy.Duration(0.1), self.running_cb)
 
         self.ref_pose_pub = rospy.Publisher('ref_pose', Pose, queue_size = 3)
         self.integrate_and_pub_timer = rospy.Timer(rospy.Duration(1/float(FREQUENCY)), self.timer_cb)
@@ -68,8 +74,19 @@ class SimpleTargets(object):
 
 #****************************
 # WIP
-    def button_cb(self, button_message):
-        if button_message.grey_button: #Enable movement if grey button held
+    def running_cb(self, key_msg):
+        # Deadman switch
+        if self.key.kbhit(): # Check if key pressed
+            key_input = self.key.getch()
+            if key_input == 's':
+                desired_sys_state = ON
+            elif key_input == 'f':
+                desired_sys_state = OFF
+
+            if self.run_state is not desired_sys_state:
+                self.run_state = desired_run_state
+
+        if (self.run_state): #Enable movement if 's' was pressed
             # set velocity:
             jvels = XYZ_INVERT_MAP*XYZ_SCALE*np.choose(XYZ_INDEX_ARR, joy_message.axes)
             self.ee_dot = np.array(jvels)

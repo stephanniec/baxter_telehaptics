@@ -3,13 +3,18 @@
 # Tasks:
 # 1. Checks if right trigger on PS3 pressed
 # 2. Open/Closes Baxter's right gripper
+# 3. Make sure active window is the terminal (rviz may intercept)
 #
 # Written BY Stephanie L. Chang
 # Last updated 5/16/17
 #----------------------------------------------------------------------
+# ROS Imports
 import rospy
-from phantom_omni.msg import PhantomButtonEvent
+
+# Local Imports
 import baxter_interface
+import kbhit
+from phantom_omni.msg import PhantomButtonEvent
 
 ####################
 # GLOBAL VARIABLES #
@@ -37,30 +42,42 @@ class HandControl():
         self.names = self.kin.get_joint_names()
         #Testing end
 
+        # Instatiating objects
+        self.kb = kbhit.KBHit()
         self.rh = baxter_interface.Gripper("right")
+
         rospy.sleep(1.0)
         self.run_state = ON
         self.run_state = OFF
         self.gripper_state = OPEN
         self.gripper_state = CLOSED
 
-        # Subscribers and publishers
+        # Timers, subscribers and publishers
+        self.kb_timer = rospy.Timer(rospy.Duration(0.1), self.run_cb)
         self.omni_grey_sub = rospy.Subscriber('omni1_button', PhantomButtonEvent, self.omni_grey_cb)
-        self.key_sub = rospy.Subscriber('', , self.run_cb)
 
-    def run_cb(self,key_msg):
-        # Deadman switch: 's' for on, 'f' for off
-        if (key_msg):
-            
-        else if (key_msg):
+    def run_cb(self,kb_msg):
+        # Deadman switch
+        if self.kb.kbhit(): # Check if key pressed
+            kb_input = self.kb.getch()
+            if kb_input == 's':
+                bad_key = False
+                desired_run_state = ON
+            elif kb_input == 'f':
+                bad_key = False
+                desired_run_state = OFF
+            else:
+                rospy.loginfo("Invalid key. Please try again.")
+                bad_key = True
 
-        if self.run_state is not desired_run_state:
-            self.run_state = desired_run_state
+            if (bad_key == False):
+                if self.run_state is not desired_run_state:
+                    self.run_state = desired_run_state
         return
 
     def omni_grey_cb(self,omni_msg):
         # Gripper switch
-        if (omni_msg.white_button): # ON and pressed
+        if (self.run_state and omni_msg.white_button): # ON and button pressed
             desired_state = CLOSED
             command = self.rh.close
         else:
