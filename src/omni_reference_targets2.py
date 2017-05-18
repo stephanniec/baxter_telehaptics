@@ -68,7 +68,6 @@ class SimpleTargets(object):
         self.key_timer = rospy.Timer(rospy.Duration(0.01), self.running_cb)
         self.js_sub = rospy.Subscriber('/omni1_joint_states', JointState, self.js_cb)
         self.ref_pose_pub = rospy.Publisher('ref_pose', Pose, queue_size = 3)
-        #self.integrate_and_pub_timer = rospy.Timer(rospy.Duration(1/float(FREQUENCY)), self.timer_cb)
 
         self.listen = tf.TransformListener()
         return
@@ -94,8 +93,6 @@ class SimpleTargets(object):
                     self.run_flag = desired_sys_state
                     rospy.loginfo("Running: %s", self.run_flag)
 
-#****************************
-#---WIP: Target frame control from velocity ---> position -------------
     def js_cb(self, omni_js_msg):
         # Enable movement if 's' pressed
         if (self.run_flag):
@@ -131,8 +128,6 @@ class SimpleTargets(object):
         self.ref_pose_pub.publish(Pose(Point(*self.position), Quaternion(*self.orientation)))
         self.br.sendTransform(self.position, self.orientation, rospy.Time.now(), TARGET_FRAME, REF_FRAME)
         return
-
-#*********************************
 
 def main():
     rospy.init_node('omni_reference_pose_generator')

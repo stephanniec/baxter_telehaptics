@@ -28,9 +28,9 @@
     <node name="omni_reference_pose_generator" pkg="telehaptics" type="omni_reference_targets2.py" output="screen"/>
 
     <!--Bare velocity controller node-->
-    <!-- <node name="velocity_control" pkg="telehaptics" type="velocity_control.py" output="screen"/> -->
+    <node name="velocity_control" pkg="telehaptics" type="velocity_control.py" output="screen"/>
 
     <!--OMNI gripper control node-->
-    <node name="omni_gripper_open_close" pkg="telehaptics" type="omni_gripper_control.py" />
+    <node name="omni_gripper_open_close" pkg="telehaptics" type="omni_gripper_control.py" respawn="true" output="screen"/>
 
 </launch>
