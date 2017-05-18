@@ -1,11 +1,11 @@
 <launch>
 
     <!--Baxter URDF-->
-    <!-- <arg name="baxter_urdf" value="robot_description"/> -->
-    <!-- <param name="$(arg baxter_urdf)" textfile="$(find telehaptics)/urdf/baxter.urdf"/> -->
+    <arg name="baxter_urdf" value="robot_description"/>
+    <param name="$(arg baxter_urdf)" textfile="$(find telehaptics)/urdf/baxter.urdf"/>
 
     <!--OMNI Files-->
-    <!-- OMNI node publishes joint states on omni1_joint_states -->
+    <!-- omni1 node publishes joint states on omni1_joint_states -->
     <node name="omni1" pkg="phantom_omni" type="omni" output="screen" />
 
   	<!-- robot_description tells robot_state_publisher where to find the omni's urdf description -->
@@ -25,7 +25,7 @@
     <node name="rviz" pkg="rviz" type="rviz" output="screen"/>
 
     <!--OMNI pose publishing node-->
-    <node name="omni_reference_pose_generator" pkg="telehaptics" type="omni_reference_targets.py" output="screen"/>
+    <node name="omni_reference_pose_generator" pkg="telehaptics" type="omni_reference_targets2.py" output="screen"/>
 
     <!--Bare velocity controller node-->
     <!-- <node name="velocity_control" pkg="telehaptics" type="velocity_control.py" output="screen"/> -->
