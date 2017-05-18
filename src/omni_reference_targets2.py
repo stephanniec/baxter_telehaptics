@@ -23,6 +23,15 @@ import numpy as np
 #Local Imports
 import kbhit
 
+def welcome():
+    print "\n------------------------------------------------------\n"
+    print "Phantom Omni Baxter Controller\n"
+    print "Written by Stephanie Chang (2017)\n\n"
+    print "Press 's' to start moving the robot's right arm\n"
+    print "Press 'f' to stop moving the robot's right arm\n"
+    print "Press ctrl+c to terminate the software\n"
+    print "--------------------------------------------------------\n"
+
 def calc_quat(th):
     return tr.quaternion_from_euler(3.115649698300095, -0.02399721058403635, th, 'rxyz')
 
@@ -135,6 +144,7 @@ class SimpleTargets(object):
 
 def main():
     rospy.init_node('omni_reference_pose_generator')
+    welcome()
 
     try:
         new_pose = SimpleTargets()
