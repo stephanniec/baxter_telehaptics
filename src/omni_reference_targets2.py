@@ -15,6 +15,7 @@ import tf
 import tf.transformations as tr
 from geometry_msgs.msg import Pose, Point, Quaternion
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Bool
 
 #Python Imports
 import numpy as np
@@ -65,11 +66,12 @@ class SimpleTargets(object):
 
         #Subscribers and Publishers
         self.br = tf.TransformBroadcaster()
+        self.listen = tf.TransformListener()
         self.key_timer = rospy.Timer(rospy.Duration(0.01), self.running_cb)
         self.js_sub = rospy.Subscriber('/omni1_joint_states', JointState, self.js_cb)
         self.ref_pose_pub = rospy.Publisher('ref_pose', Pose, queue_size = 3)
+        self.run_status_pub = rospy.Publisher('/run_status', Bool, queue_size = 3)
 
-        self.listen = tf.TransformListener()
         return
 
     def running_cb(self, key_msg):
@@ -92,6 +94,8 @@ class SimpleTargets(object):
                 if self.run_flag is not desired_sys_state:
                     self.run_flag = desired_sys_state
                     rospy.loginfo("Running: %s", self.run_flag)
+
+            self.run_status_pub.publish(desired_sys_state)
 
     def js_cb(self, omni_js_msg):
         # Enable movement if 's' pressed

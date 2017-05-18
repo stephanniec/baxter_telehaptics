@@ -14,6 +14,7 @@ import rospy
 # Local Imports
 import baxter_interface
 import kbhit
+from std_msgs.msg import Bool
 from phantom_omni.msg import PhantomButtonEvent
 
 ####################
@@ -39,23 +40,18 @@ class HandControl():
         self.gripper_state = CLOSED
 
         # Subscribers
-        self.omni_grey_sub = rospy.Subscriber('omni1_button', PhantomButtonEvent, self.omni_white_cb, queue_size=1)
+        self.run_flag_sub = rospy.Subscriber('/run_status', Bool, self.run_cb)
+        self.omni_white_sub = rospy.Subscriber('omni1_button', PhantomButtonEvent, self.omni_white_cb, queue_size=1)
         return
 
-    def run_cb(self,kb_msg):
+    def run_cb(self, sys_status_msg):
         # Deadman switch
-        if self.kb.kbhit(): # Check if key pressed
-            kb_input = self.kb.getch()
-            if kb_input == 's':
-                desired_run_state = ON
-                self.run_state = ON
-                rospy.loginfo("Set run_state to ON.")
-            elif kb_input == 'f':
-                desired_run_state = OFF
-                self.run_state = OFF
-                rospy.loginfo("Set run_state to OFF.")
-            else:
-                rospy.loginfo("Invalid key. Please try again.")
+        if sys_status_msg:
+            self.run_state = ON
+            rospy.loginfo("Set run_state to ON.")
+        else:
+            self.run_state = OFF
+            rospy.loginfo("Set run_state to OFF.")
         return
 
     def omni_white_cb(self,omni_msg):
