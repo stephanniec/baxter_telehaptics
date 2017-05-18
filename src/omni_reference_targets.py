@@ -3,17 +3,18 @@
 #
 # Tasks:
 # 1. Reads OMNI tf output
-# 2. Maps controller positions to a pose
+# 2. Maps controller positions to a target pose using velocities
 # 3. Defines EE pose work space
 #
 # Written by Stephanie L. Chang
-# Last updated 5/16/17
+# Last updated 5/17/17
 #----------------------------------------------------------------------
 # ROS Imports
 import rospy
 import tf
 import tf.transformations as tr
 from geometry_msgs.msg import Pose, Point, Quaternion
+from sensor_msgs.msg import JointState
 
 #Python Imports
 import numpy as np
@@ -27,12 +28,10 @@ def calc_quat(th):
 ####################
 # GLOBAL VARIABLES #
 ####################
-ZERO_POS = np.array([0.749870470328, -0.466371185967,  0.0240209384569])
-#ZERO_POS = np.array([0.902160877388, -0.0715308389238, 0.284243124085]) #Sawyer start pos
+ZERO_POS = np.array([0.7, -0.45, 0.0]) #Baxter start pos
 ZERO_ORI = calc_quat(0.0)
-
-XYZ_MIN = np.array([0.4, -0.4, 0.01]) #Sawyer Limits
-XYZ_MAX = np.array([0.82, 0.4, 0.25]) #Sawyer Limits
+XYZ_MIN = np.array([0.6, -0.75, -0.25]) #Baxter Limits
+XYZ_MAX = np.array([0.8, -0.25, 0.25])  #Baxter Limits
 XYZ_SCALE = np.array([1, 1.25, 1.25])
 XYZ_INVERT_MAP = np.array([1, 1, 1])
 XYZ_INDEX_ARR = np.array([0,1,2])
@@ -69,6 +68,7 @@ class SimpleTargets(object):
         #Subscribers and Publishers
         self.br = tf.TransformBroadcaster()
         self.key_timer = rospy.Timer(rospy.Duration(0.01), self.running_cb)
+        self.js_sub = rospy.Subscriber('/omni1_joint_states', JointState, self.js_cb)
         self.ref_pose_pub = rospy.Publisher('ref_pose', Pose, queue_size = 3)
         self.integrate_and_pub_timer = rospy.Timer(rospy.Duration(1/float(FREQUENCY)), self.timer_cb)
 
@@ -98,6 +98,7 @@ class SimpleTargets(object):
 
 #****************************
 #---WIP----------------------
+    def js_cb(self, omni_js_msg):
         # Enable movement if 's' pressed
         if (self.run_flag):
             try:
@@ -108,14 +109,13 @@ class SimpleTargets(object):
                 return
 
             p_list =  np.array(omni_p) - XYZ_OFFSET_ARR
-            quat_list = np.array(omni_quat)
+            w3_angle = omni_js_msg.position[5]
 
             # set velocity: Takes position as [px, py, pz] vector
             jvels = XYZ_INVERT_MAP*XYZ_SCALE*np.choose(XYZ_INDEX_ARR, p_list)
-            # print jvels
-            # jvels = np.choose(XYZ_INDEX_ARR, p_list)
             self.ee_dot = np.array(jvels)
-            # self.th_dot = TH_SCALE*omni_quat[TH_INDEX]
+
+            self.th_dot = TH_SCALE*w3_angle
         else:
             self.ee_dot = np.array([0,0,0])
             self.th_dot = 0.0

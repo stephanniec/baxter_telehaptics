@@ -4,9 +4,8 @@
     <!-- <arg name="baxter_urdf" value="robot_description"/> -->
     <!-- <param name="$(arg baxter_urdf)" textfile="$(find telehaptics)/urdf/baxter.urdf"/> -->
 
-    <!--OMNI URDF-->
-    <!-- <include file="$(find phantom_omni)/launch/omni_headless.launch" /> -->
-    <!-- omni node publishes joint states on omni1_joint_states -->
+    <!--OMNI Files-->
+    <!-- OMNI node publishes joint states on omni1_joint_states -->
     <node name="omni1" pkg="phantom_omni" type="omni" output="screen" />
 
   	<!-- robot_description tells robot_state_publisher where to find the omni's urdf description -->
@@ -19,7 +18,8 @@
       <param name="tf_prefix" value="omni"/>
   	</node>
 
-    <node name="omni_to_baxter_connect" pkg="tf" type="static_transform_publisher" args="1 0.5 0 0.0 0 0 /base /omni/base 100"/> 
+    <!--Connects OMNI and Baxter tf trees-->
+    <node name="omni_to_baxter_connect" pkg="tf" type="static_transform_publisher" args="1 0.5 0 0.0 0 0 /base /omni/base 100"/>
 
     <!--Rviz-->
     <node name="rviz" pkg="rviz" type="rviz" output="screen"/>
