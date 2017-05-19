@@ -24,7 +24,7 @@ This node generates target poses by scaling and mapping the transform between th
 <b>velocity_control.py</b><br>
 The velocity control script used to control Baxter via the Touch is the same as that which was used to control the robot via the PS3 controller.
 
-<b>omni_gripper_control.py</b>
+<b>omni_gripper_control.py</b><br>
 This node closes Baxter's right gripper when the white button on the Touch's stylus is held down.
 
 ## Launch Files
@@ -62,5 +62,5 @@ After cloning `baxter_telehaptics` into a catkin workspace, please install the f
 ## Current Status
 * PS3 Controller UI - done
 * Velocity controller - done
-* Geomagic Touch UI - WIP
+* Geomagic Touch UI - done
 * Force feedback node - WIP
