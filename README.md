@@ -3,6 +3,14 @@
 ## Purpose
 The Telehaptics Ros Python package allows users to drive the right arm of a Baxter or Sawyer research robot using the stylus of a Geomagic Touch (formerly the Phantom Omni). If external force is applied to the end effector, the Geomagic Touch will remotely generate the same forces on the user's hand - creating a closed-loop biofeedback interface.
 
+## Table of Contents
+[PS3 Node Network](#ps3-node-network)<br>
+[Geomagic Touch Node Network](#geomagic-touch-node-network)<br>
+[Launch Files](#launch-files)<br>
+[PS3 Controls](#ps3-controls)<br>
+[Set-up Instructions](#set-up-instructions)<br>
+[Current Status](#current-status)
+
 ## PS3 Node Network
 <b>joystick_reference_targets.py</b><br>
 This node generates target poses using the position values published by `joy_node`. As a safety precaution, it also ensures that Baxter will not move unless the L1 trigger on a PS3 console is held down.
