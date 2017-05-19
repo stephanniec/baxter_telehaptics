@@ -1,9 +1,9 @@
 # Geomagic Touch Mediated Haptic Interface
 
 ## Purpose
-The Telehaptics Ros Python package allows users to drive the right arm of a Baxter or Sawyer research robot using the stylus of a Geomagic Touch. If external force is applied to the end effector, the Geomagic Touch will remotely generate the same forces on the user's hand - creating a closed-loop biofeedback interface.
+The Telehaptics Ros Python package allows users to drive the right arm of a Baxter or Sawyer research robot using the stylus of a Geomagic Touch (formerly the Phantom Omni). If external force is applied to the end effector, the Geomagic Touch will remotely generate the same forces on the user's hand - creating a closed-loop biofeedback interface.
 
-## Node Network
+## PS3 Node Network
 <b>joystick_reference_targets.py</b><br>
 This node generates target poses using the position values published by `joy_node`. As a safety precaution, it also ensures that Baxter will not move unless the L1 trigger on a PS3 console is held down.
 
@@ -17,25 +17,39 @@ This node closes Baxter's right gripper when the R1 trigger on a PS3 console is 
 
 (Sawyer equivalent: `sawyer_gripper_control.py`)
 
+## Geomagic Touch Node Network
+<b>omni_reference_targets2.py</b><br>
+This node generates target poses by scaling and mapping the transform between the Touch's stylus frame and its base frame. A subscriber to `omni1_joint_states` also associates rotations about the x-axis of the stylus frame to rotations about the z-axis of the target frame.
+
+<b>velocity_control.py</b><br>
+The velocity control script used to control Baxter via the Touch is the same as that which was used to control the robot via the PS3 controller.
+
+<b>omni_gripper_control.py</b>
+This node closes Baxter's right gripper when the white button on the Touch's stylus is held down.
+
 ## Launch Files
 
-`simstate.launch`
+`simstate.launch` : starts up a basic rviz simulation of Baxter which displays individual joint angles that can be manipulated using slider bars
 
-`basicsys.launch`
+`basicsys.launch` : starts up a basic velocity controller which tells Baxter to move to hardcoded poses
 
-`joysys.launch`
+`joysys.launch` : starts up the PS3 Baxter controller demo
 
-`sawyer_joysys.launch`
+`sawyer_joysys.launch` : starts up the PS3 Sawyer controller demo
+
+`omnisys.launch` : starts up the Touch Baxter controller demo
 
 ## PS3 Controls
 ![ps3console](https://github.com/stephanniec/baxter_telehaptics/blob/master/imgs/ps3_schematic.png)<br>
-<b>L1 button</b> || Hold down to enable robot movement<br>
-<b>R1 button</b> || Hold down to close robot end-effector
+~~~
+L1 button : Hold down to enable robot movement
+R1 button : Hold down to close robot end-effector
 
-<b>Left stick (L/R)</b> || Horizontal movement along the Y-axis<br>
-<b>Left stick (U/D)</b> || Vertical movement along the Z-axis<br>
-<b>Right stick (U/D)</b> || Horizontal movement towards or away from user along the X-axis<br>
-<b>Right stick (L/R)</b> || Rotates the gripper clockwise or counterclockwise
+Left stick (L/R) : Horizontal movement along the Y-axis
+Left stick (U/D) : Vertical movement along the Z-axis
+Right stick (U/D) : Horizontal movement towards or away from user along the X-axis
+Right stick (L/R) : Rotates the gripper clockwise or counterclockwise
+~~~
 
 ## Set-up Instructions
 After cloning `baxter_telehaptics` into a catkin workspace, please install the following auxiliary packages:
