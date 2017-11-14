@@ -7,7 +7,7 @@
     <node name="joy_node" pkg="joy" type="joy_node" output="screen"/>
 
     <!--Rviz-->
-<!--     <node name="rviz" pkg="rviz" type="rviz" output="screen"/> -->
+    <node name="rviz" pkg="rviz" type="rviz" output="screen"/>
 
     <!--PS3 pose publishing node-->
     <node name="joystick_reference_pose_generator" pkg="telehaptics" type="joystick_reference_targets.py" output="screen"/>

@@ -38,11 +38,11 @@ def calc_quat(th):
 ####################
 # GLOBAL VARIABLES #
 ####################
-ZERO_POS = np.array([0.7, -0.45, 0.0]) #Baxter start pos
+ZERO_POS = np.array([0.7, -0.45, 0.1]) #Baxter start pos
 ZERO_ORI = calc_quat(0.0)
-XYZ_MIN = np.array([0.4, -0.75, -0.25]) #Baxter abs limits
-XYZ_MAX = np.array([1.0, -0.25, 0.25])  #Baxter abs limits
-XYZ_SCALE = np.array([1.0, 1.25, 1.25])
+XYZ_MIN = np.array([0.4, -0.75, 0.0]) #Baxter abs limits
+XYZ_MAX = np.array([1.0, 0.1, 0.5])  #Baxter abs limits
+XYZ_SCALE = np.array([1.0, 1.5, 1.25])
 XYZ_INVERT_MAP = np.array([-1, -1, -1])
 XYZ_INDEX_ARR = np.array([0, 1, 2]) #With np.choose: 0th element, first val, etc.
 XYZ_OFFSET_ARR = np.array([0.206, 0.0, 0.047]) #For position from /omni/base to /omni/stylus
